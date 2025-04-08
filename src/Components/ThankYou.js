@@ -12,7 +12,7 @@ const ThankYou = () => {
       <Header showBack={false} />
       <Container maxWidth="sm" sx={{ mt: 4, textAlign: 'center' }}>
         <Typography variant="h4" gutterBottom>
-          Thank You!
+          Thank You
         </Typography>
         <Box sx={{ mt: 2 }}>
           <Button
