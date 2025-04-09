@@ -20,7 +20,8 @@ const TipOptions = () => {
 
   // Function to submit the email and tip to Firebase
   const submitData = async (tipAmount) => {
-    // Retrieve the email saved in the DetailsForm step
+    // Save tip value to localStorage so the ThankYou page can read it
+    localStorage.setItem('selectedTip', tipAmount);
     const email = localStorage.getItem('email') || "unspecified";
     const parsedTip = parseFloat(tipAmount) || 0;
     const submission = {
@@ -28,10 +29,10 @@ const TipOptions = () => {
       email: email,
       timestamp: serverTimestamp(),
     };
-
+  
     try {
       await addDoc(collection(db, 'tips'), submission);
-      // Clear stored email after submission
+      // Optional: clear the email if desired
       localStorage.removeItem('email');
       navigate('/thankyou');
     } catch (error) {
@@ -39,6 +40,7 @@ const TipOptions = () => {
       alert("An error occurred. Please try again.");
     }
   };
+  
 
   // Handlers for preset tip options
   const handlePresetTip = (tip) => {
