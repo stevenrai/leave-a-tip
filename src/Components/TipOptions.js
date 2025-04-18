@@ -1,5 +1,5 @@
 // src/components/TipOptions.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Container,
   Typography,
@@ -15,107 +15,94 @@ import { collection, addDoc } from 'firebase/firestore';
 
 const TipOptions = () => {
   const navigate = useNavigate();
+  const [experience, setExperience] = useState('Basic');
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [customTip, setCustomTip] = useState('');
 
-  // Function to submit the email and tip to Firebase
+  useEffect(() => {
+    setExperience(localStorage.getItem('experience') || 'Basic');
+  }, []);
+
   const submitData = async (tipAmount) => {
-    // Save tip value to localStorage so the ThankYou page can read it
     localStorage.setItem('selectedTip', tipAmount);
-    const email = localStorage.getItem('email') || "unspecified";
+    const email = localStorage.getItem('email') || 'unspecified';
     const parsedTip = parseFloat(tipAmount) || 0;
-    const submission = {
-      tipAmount: parsedTip,
-      email: email,
-      timestamp: serverTimestamp(),
-    };
-  
+    const submission = { tipAmount: parsedTip, email, timestamp: serverTimestamp() };
+
     try {
       await addDoc(collection(db, 'tips'), submission);
-      // Optional: clear the email if desired
       localStorage.removeItem('email');
+      localStorage.removeItem('experience');
       navigate('/thankyou');
-    } catch (error) {
-      console.error("Error writing document: ", error);
-      alert("An error occurred. Please try again.");
+    } catch (err) {
+      console.error(err);
+      alert('An error occurred. Please try again.');
     }
   };
-  
 
-  // Handlers for preset tip options
-  const handlePresetTip = (tip) => {
-    submitData(tip);
-  };
-
-  // Handler for custom tip confirmation
+  const handlePresetTip = (tip) => submitData(tip);
+  const handleNoTip = () => submitData(0);
   const handleCustomConfirm = () => {
-    const tipValue = parseFloat(customTip);
-    if (isNaN(tipValue) || tipValue < 0.1 || tipValue > 10000) {
-      alert('Please enter a valid tip value between 0.1 and 10000');
+    const val = parseFloat(customTip);
+    if (isNaN(val) || val < 0.1 || val > 10000) {
+      alert('Enter a value between 0.1 and 10000');
       return;
     }
-    submitData(tipValue);
+    submitData(val);
   };
 
-  // Handler for "No Tip" option
-  const handleNoTip = () => {
-    submitData(0);
-  };
+  // Define preset buttons based on experience
+  const presets = experience === 'Political'
+    ? [ { label: 'Israel', value: '15' }, { label: 'Palestine', value: '18' }, { label: '20%', value: '20' } ]
+    : [ { label: '15%', value: '15' }, { label: '18%', value: '18' }, { label: '20%', value: '20' } ];
 
   return (
     <>
-      {/* Show back arrow here so user can return to the email step if needed */}
       <Header showBack={true} />
       <Container maxWidth="sm" sx={{ mt: 4, textAlign: 'center' }}>
         <Typography variant="h5" gutterBottom>
-          Choose a tip amount
+          Just one question…
         </Typography>
+
         {/* Preset tip options */}
         <Grid container spacing={2} justifyContent="center" sx={{ mt: 2 }}>
-          {['15', '18', '20'].map((tip) => (
-            <Grid item xs={6} sm={3} key={tip}>
+          {presets.map(({ label, value }) => (
+            <Grid item xs={6} sm={3} key={value}>
               <Button
                 variant="contained"
                 fullWidth
-                onClick={() => handlePresetTip(tip)}
+                onClick={() => handlePresetTip(value)}
                 sx={{ py: 2, minHeight: '56px' }}
               >
-                {tip}%
+                {label}
               </Button>
             </Grid>
           ))}
         </Grid>
-        {/* Custom Tip Option */}
+
+        {/* Custom Tip */}
         <Box sx={{ mt: 4, width: '100%' }}>
           {showCustomInput ? (
-            // Replace the button with an input field and proceed button
-            <Box
-              sx={{
-                display: 'flex',
-                width: '100%',
-                alignItems: 'stretch'
-              }}
-            >
+            <Box sx={{ display: 'flex', width: '100%', alignItems: 'stretch' }}>
               <TextField
-                label="Tip (%)"
+                label="Custom Tip (%)"
                 type="number"
                 variant="outlined"
                 value={customTip}
-                onChange={(e) => setCustomTip(e.target.value)}
+                onChange={e => setCustomTip(e.target.value)}
                 InputProps={{ inputProps: { step: 0.1, min: 0.1, max: 10000 } }}
-                sx={{ flex: '0 0 20%', mr: 1 }}
+                sx={{ flex: '0 0 70%', mr: 1 }}
               />
               <Button
                 variant="contained"
                 fullWidth
                 onClick={handleCustomConfirm}
-                sx={{ flex: '0 0 80%', minHeight: '56px' }}
+                sx={{ flex: '0 0 30%', minHeight: '56px' }}
               >
                 Proceed
               </Button>
             </Box>
           ) : (
-            // Full-width "Custom Tip" button which, when clicked, is replaced by the input row.
             <Button
               variant="outlined"
               fullWidth
@@ -126,18 +113,14 @@ const TipOptions = () => {
             </Button>
           )}
         </Box>
-        {/* No Tip Button */}
+
+        {/* No Tip */}
         <Box sx={{ mt: 2 }}>
           <Button
             variant="text"
             fullWidth
             onClick={handleNoTip}
-            sx={{
-              py: 2,
-              minHeight: '56px',
-              color: 'lightgrey',
-              fontWeight: 400
-            }}
+            sx={{ py: 2, minHeight: '56px', color: 'lightgrey', fontWeight: 400 }}
           >
             No Tip
           </Button>

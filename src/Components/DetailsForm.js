@@ -1,23 +1,34 @@
 // src/components/DetailsForm.js
 import React, { useState } from 'react';
-import { Container, Box, Typography, TextField, Button } from '@mui/material';
+import {
+  Container,
+  Box,
+  Typography,
+  TextField,
+  Button,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+  FormLabel,
+  FormControl
+} from '@mui/material';
 import Header from './Header';
 import { useNavigate } from 'react-router-dom';
 
 const DetailsForm = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
+  const [experience, setExperience] = useState('Basic');
 
   const handleNext = () => {
-    // Save the email for later use (to be retrieved in TipOptions)
+    // Store both email and experience
     localStorage.setItem('email', email);
-    // Navigate to the tip selection page (we’ll call that route "/tips")
+    localStorage.setItem('experience', experience);
     navigate('/tips');
   };
 
   return (
     <>
-      {/* No back arrow here since this is the first step */}
       <Header showBack={false} />
       <Container maxWidth="sm" sx={{ mt: 4, textAlign: 'center' }}>
         <Typography variant="h4" gutterBottom>
@@ -32,8 +43,34 @@ const DetailsForm = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-          <Box sx={{ mt: 2 }}>
-            <Button variant="contained" onClick={handleNext} fullWidth sx={{ py: 2, minHeight: '56px' }}>
+
+          <FormControl component="fieldset" sx={{ mt: 3, textAlign: 'left' }}>
+            <FormLabel component="legend">Choose your experience</FormLabel>
+            <RadioGroup
+              row
+              value={experience}
+              onChange={(e) => setExperience(e.target.value)}
+            >
+              <FormControlLabel
+                value="Basic"
+                control={<Radio />}
+                label="Basic"
+              />
+              <FormControlLabel
+                value="Political"
+                control={<Radio />}
+                label="Political"
+              />
+            </RadioGroup>
+          </FormControl>
+
+          <Box sx={{ mt: 4 }}>
+            <Button
+              variant="contained"
+              fullWidth
+              onClick={handleNext}
+              sx={{ py: 2, minHeight: '56px' }}
+            >
               Next
             </Button>
           </Box>

@@ -24,7 +24,7 @@ const Header = ({ showBack = false }) => {
           <Box sx={{ width: 48 }} />
         )}
         <Typography variant="h6" component="div">
-          Just the tip for SRai
+          Just the tip
         </Typography>
         {/* Empty Box on the right to balance the layout */}
         <Box sx={{ width: 48 }} />
